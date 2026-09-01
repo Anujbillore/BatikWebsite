@@ -26,7 +26,7 @@ export default function Loader({ onDone }: { onDone: () => void }) {
       <p className="loader-sub mb-4 text-[11px] uppercase tracking-[0.5em] text-saffron opacity-0">
         Ujjain · Mhow
       </p>
-      <h1 className="loader-title font-serif text-6xl italic tracking-tight text-ink opacity-0 translate-y-8 md:text-8xl">
+      <h1 className="loader-title font-serif text-5xl italic tracking-tight text-ink opacity-0 translate-y-8 md:text-8xl">
         Dwara
       </h1>
       <div className="mt-10 h-[2px] w-48 overflow-hidden bg-ink/10">

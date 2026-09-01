@@ -1,11 +1,16 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { processSteps } from "@/lib/data";
 
 function ProcessVideo() {
   const video = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
+  const [hint, setHint] = useState("Hover to play");
+
+  useEffect(() => {
+    if (!window.matchMedia("(hover: hover)").matches) setHint("Tap to play");
+  }, []);
 
   const play = async () => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -43,7 +48,7 @@ function ProcessVideo() {
     >
       <video
         ref={video}
-          className="mx-auto max-h-[70vh] w-full max-w-md object-cover md:max-w-lg"
+          className="mx-auto max-h-[55vh] w-full max-w-md object-cover md:max-h-[70vh] md:max-w-lg"
         playsInline
         muted
         loop
@@ -58,7 +63,7 @@ function ProcessVideo() {
         }`}
       >
         <span className="rounded-full bg-white/90 px-5 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-ink">
-          Hover to play
+          {hint}
         </span>
       </div>
     </div>
@@ -67,7 +72,7 @@ function ProcessVideo() {
 
 export default function Process() {
   return (
-    <section id="process" className="relative z-10 bg-ivory px-5 py-24 md:px-12">
+    <section id="process" className="relative z-10 bg-ivory px-4 py-16 sm:px-5 sm:py-24 md:px-12">
       <p className="text-[11px] uppercase tracking-[0.4em] text-saffron">How it is made</p>
       <h2 className="mt-2 max-w-3xl font-serif text-4xl text-ink md:text-6xl">
         Wax, block, dye — then the cloth speaks.
@@ -82,8 +87,8 @@ export default function Process() {
       <ol className="mt-16 grid gap-8 md:grid-cols-2">
         {processSteps.map((step) => (
           <li key={step.n} className="glass overflow-hidden rounded-3xl">
-            <img src={step.image} alt={step.title} className="h-64 w-full object-cover" />
-            <div className="p-7">
+            <img src={step.image} alt={step.title} className="h-52 w-full object-cover sm:h-64" />
+            <div className="p-5 sm:p-7">
               <p className="font-display text-sm tracking-[0.3em] text-turquoise">{step.n}</p>
               <h3 className="mt-1 font-serif text-3xl text-ink">{step.title}</h3>
               <p className="mt-3 text-sm leading-relaxed text-ink/70">{step.body}</p>

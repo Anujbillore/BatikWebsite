@@ -32,7 +32,7 @@ function Card({ item, onOpen }: { item: Product; onOpen: (p: Product) => void })
       </span>
       <div className="absolute inset-x-0 bottom-0 p-5">
         <p className="text-[10px] uppercase tracking-[0.24em] text-teal-200">{item.place}</p>
-        <h3 className="mt-1 font-serif text-2xl text-white">{item.title}</h3>
+        <h3 className="mt-1 font-serif text-xl text-white sm:text-2xl">{item.title}</h3>
       </div>
     </button>
   );
@@ -49,21 +49,23 @@ export default function Collections() {
     const ctx = gsap.context(() => {
       gsap.from(".atelier-heading", {
         scrollTrigger: { trigger: section.current, start: "top 80%" },
-        x: reduced ? 0 : -80,
+        x: reduced || window.innerWidth < 768 ? 0 : -80,
+        y: window.innerWidth < 768 ? 24 : 0,
         opacity: 0,
         duration: 0.8,
         ease: "power3.out",
       });
       gsap.from(".atelier-tabs", {
         scrollTrigger: { trigger: section.current, start: "top 80%" },
-        x: reduced ? 0 : 80,
+        x: reduced || window.innerWidth < 768 ? 0 : 80,
+        y: window.innerWidth < 768 ? 16 : 0,
         opacity: 0,
         duration: 0.8,
         ease: "power3.out",
       });
       gsap.from(".atelier-card", {
         scrollTrigger: { trigger: section.current, start: "top 72%" },
-        x: reduced ? 0 : (i: number) => (i % 2 === 0 ? -160 : 160),
+        x: reduced || window.innerWidth < 768 ? 0 : (i: number) => (i % 2 === 0 ? -160 : 160),
         y: 28,
         opacity: 0,
         duration: 0.95,
@@ -75,19 +77,19 @@ export default function Collections() {
   }, [tab]);
 
   return (
-    <section ref={section} id="collections" className="relative z-10 overflow-x-hidden bg-ivory px-5 py-28 md:px-12">
-      <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
+    <section ref={section} id="collections" className="relative z-10 overflow-x-hidden bg-ivory px-4 py-16 sm:px-5 sm:py-24 md:px-12 md:py-28">
+      <div className="mb-8 flex flex-col gap-5 sm:mb-10 md:flex-row md:flex-wrap md:items-end md:justify-between">
         <div className="atelier-heading">
           <p className="text-[11px] uppercase tracking-[0.4em] text-saffron">Collections</p>
           <h2 className="mt-2 font-serif text-4xl text-ink md:text-6xl">Shop the atelier</h2>
         </div>
-        <div className="atelier-tabs flex rounded-full border border-ink/15 bg-white p-1">
+        <div className="atelier-tabs grid w-full grid-cols-2 rounded-full border border-ink/15 bg-white p-1 sm:flex sm:w-auto">
           {(["batik", "smoke"] as const).map((t) => (
             <button
               key={t}
               type="button"
               onClick={() => setTab(t)}
-              className={`rounded-full px-5 py-2 text-xs uppercase tracking-[0.2em] ${
+              className={`rounded-full px-3 py-2.5 text-center text-[10px] uppercase tracking-[0.12em] sm:px-5 sm:text-xs sm:tracking-[0.2em] ${
                 tab === t ? "gold-btn" : "text-ink/70"
               }`}
             >
@@ -110,25 +112,25 @@ export default function Collections() {
 
       {open && (
         <div
-          className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-6"
+          className="fixed inset-0 z-50 grid place-items-end overflow-y-auto bg-ink/40 p-4 sm:place-items-center sm:p-6"
           onClick={() => setOpen(null)}
         >
           <article
-            className="glass max-w-3xl overflow-hidden rounded-3xl md:grid md:grid-cols-2"
+            className="glass max-h-[88svh] w-full max-w-3xl overflow-y-auto rounded-3xl md:grid md:grid-cols-2"
             onClick={(e) => e.stopPropagation()}
           >
             {open.image ? (
-              <img src={open.image} alt={open.title} className="h-72 w-full object-cover md:h-full" />
+              <img src={open.image} alt={open.title} className="h-52 w-full object-cover sm:h-72 md:h-full" />
             ) : (
-              <div className="h-72 bg-gradient-to-br from-clay to-[#e8c9a0] md:h-auto" />
+              <div className="h-52 bg-gradient-to-br from-clay to-[#e8c9a0] sm:h-72 md:h-auto" />
             )}
-            <div className="p-8">
+            <div className="p-5 sm:p-8">
               <p className="text-[11px] uppercase tracking-[0.3em] text-saffron">
                 {open.place} · {open.label}
               </p>
-              <h3 className="mt-2 font-serif text-4xl text-ink">{open.title}</h3>
+              <h3 className="mt-2 font-serif text-3xl text-ink sm:text-4xl">{open.title}</h3>
               <p className="mt-4 text-ink/75">{open.note}</p>
-              <a href="#contact" onClick={() => setOpen(null)} className="gold-btn mt-8 inline-block rounded-full px-6 py-3 text-sm uppercase tracking-[0.16em]">
+              <a href="#contact" onClick={() => setOpen(null)} className="gold-btn mt-8 inline-block w-full rounded-full px-6 py-3 text-center text-sm uppercase tracking-[0.16em] sm:w-auto">
                 Enquire about this piece
               </a>
             </div>

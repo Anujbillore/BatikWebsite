@@ -48,7 +48,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="relative z-10 border-t border-ink/10 bg-paper px-5 py-16 md:px-12">
+    <footer className="relative z-10 border-t border-ink/10 bg-paper px-4 pb-28 pt-16 sm:px-5 md:px-12 md:pb-16">
       <div className="mb-12 overflow-hidden rounded-3xl">
         <div className="relative h-48 bg-[#f3e0c8]">
           <img src="/images/batik/maroon-crackle.jpg" alt="" className="h-full w-full object-cover opacity-70" />
@@ -70,18 +70,18 @@ export default function Footer() {
         </div>
         <div>
           <p className="mb-3 text-sm uppercase tracking-[0.18em] text-saffron">Let us get in touch</p>
-          <form className="flex gap-2" onSubmit={onSubscribe}>
+          <form className="flex flex-col gap-2 sm:flex-row" onSubmit={onSubscribe}>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
-              className="flex-1 rounded-full border border-ink/15 bg-white px-4 py-2 text-sm text-ink outline-none"
+              className="min-w-0 flex-1 rounded-full border border-ink/15 bg-white px-4 py-3 text-base text-ink outline-none sm:py-2 sm:text-sm"
             />
             <button
               disabled={status === "loading"}
-              className="gold-btn rounded-full px-4 py-2 text-xs uppercase tracking-[0.16em] disabled:opacity-60"
+              className="gold-btn rounded-full px-4 py-3 text-xs uppercase tracking-[0.16em] disabled:opacity-60 sm:py-2"
             >
               {status === "loading" ? "Sending…" : "Subscribe"}
             </button>

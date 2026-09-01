@@ -16,6 +16,13 @@ html,
 body {
   background: var(--ivory);
   color: var(--ink);
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 html.lenis,
@@ -100,6 +107,14 @@ label {
 
 .field {
   @apply mt-2 w-full rounded-xl border border-ink/15 bg-white px-4 py-3 text-base text-ink outline-none focus:border-saffron;
+}
+
+#home,
+#collections,
+#process,
+#about,
+#contact {
+  scroll-margin-top: 5.5rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

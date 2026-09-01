@@ -40,7 +40,7 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" className="relative z-10 bg-ivory px-5 py-24 md:px-12">
+    <section id="contact" className="relative z-10 bg-ivory px-4 py-16 sm:px-5 sm:py-24 md:px-12">
       <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr]">
         <div>
           <p className="text-[11px] uppercase tracking-[0.4em] text-saffron">Contact</p>
@@ -69,7 +69,7 @@ export default function Contact() {
             <span className="mt-1 block">{atelier.address}</span>
           </a>
         </div>
-        <form onSubmit={onSubmit} className="glass space-y-4 rounded-3xl p-7">
+        <form onSubmit={onSubmit} className="glass space-y-4 rounded-3xl p-5 sm:p-7">
           <label className="block text-xs uppercase tracking-[0.2em] text-ink/60">
             Name
             <input required name="name" className="field" />

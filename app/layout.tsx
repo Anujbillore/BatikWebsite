@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Outfit, Syne } from "next/font/google";
 import "./globals.css";
 
@@ -19,6 +19,12 @@ const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-outfit",
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: "Dwara — Batik of Ujjain & Smoking Craft of Mhow",
