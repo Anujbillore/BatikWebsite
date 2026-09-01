@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -20,10 +20,12 @@ import Footer from "@/components/sections/Footer";
 const Scene = dynamic(() => import("@/components/experience/Scene"), { ssr: false });
 
 gsap.registerPlugin(ScrollTrigger);
+gsap.ticker.lagSmoothing(0);
 
 export default function HomeClient() {
-  const [ready, setReady] = useState(false);
-  const onLoaded = useCallback(() => setReady(true), []);
+  const onLoaded = useCallback(() => {
+    requestAnimationFrame(() => ScrollTrigger.refresh());
+  }, []);
 
   useEffect(() => {
     const mobile = window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768;
@@ -44,7 +46,6 @@ export default function HomeClient() {
       lenis.on("scroll", measure);
       onRaf = (time: number) => lenis?.raf(time * 1000);
       gsap.ticker.add(onRaf);
-      gsap.ticker.lagSmoothing(0);
     } else {
       window.addEventListener("scroll", measure, { passive: true });
       window.addEventListener("scroll", ScrollTrigger.update, { passive: true });
@@ -79,6 +80,7 @@ export default function HomeClient() {
     window.addEventListener("deviceorientation", onOrient);
 
     const ctx = gsap.context(() => {
+      if (mobile) return;
       gsap.utils.toArray<HTMLElement>("#process, #about, #contact").forEach((el) => {
         gsap.from(el.children, {
           scrollTrigger: { trigger: el, start: "top 82%" },
@@ -91,6 +93,10 @@ export default function HomeClient() {
       });
     });
 
+    const refresh = () => ScrollTrigger.refresh();
+    window.addEventListener("orientationchange", refresh);
+    window.addEventListener("load", refresh);
+
     return () => {
       ctx.revert();
       if (onRaf) gsap.ticker.remove(onRaf);
@@ -102,6 +108,8 @@ export default function HomeClient() {
       window.removeEventListener("deviceorientation", onOrient);
       window.removeEventListener("scroll", measure);
       window.removeEventListener("scroll", ScrollTrigger.update);
+      window.removeEventListener("orientationchange", refresh);
+      window.removeEventListener("load", refresh);
       lenis?.destroy();
     };
   }, []);
@@ -111,7 +119,9 @@ export default function HomeClient() {
       <Loader onDone={onLoaded} />
       <Cursor />
       <Navbar />
-      <div className="canvas-fixed">{ready ? <Scene /> : null}</div>
+      <div className="canvas-fixed">
+        <Scene />
+      </div>
       <div className="relative z-10 overflow-x-hidden">
         <Hero />
         <div className="overflow-hidden border-y border-saffron/20 bg-saffron py-3 text-white">

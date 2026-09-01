@@ -122,3 +122,22 @@ label {
     animation: none;
   }
 }
+
+@keyframes loadBar {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes riseIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

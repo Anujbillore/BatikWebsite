@@ -45,27 +45,28 @@ export default function Collections() {
   const items = tab === "batik" ? batikProducts : smokeProducts;
 
   useEffect(() => {
+    const mobile = window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768;
+    if (mobile) return;
+
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const ctx = gsap.context(() => {
       gsap.from(".atelier-heading", {
         scrollTrigger: { trigger: section.current, start: "top 80%" },
-        x: reduced || window.innerWidth < 768 ? 0 : -80,
-        y: window.innerWidth < 768 ? 24 : 0,
+        x: reduced ? 0 : -80,
         opacity: 0,
         duration: 0.8,
         ease: "power3.out",
       });
       gsap.from(".atelier-tabs", {
         scrollTrigger: { trigger: section.current, start: "top 80%" },
-        x: reduced || window.innerWidth < 768 ? 0 : 80,
-        y: window.innerWidth < 768 ? 16 : 0,
+        x: reduced ? 0 : 80,
         opacity: 0,
         duration: 0.8,
         ease: "power3.out",
       });
       gsap.from(".atelier-card", {
         scrollTrigger: { trigger: section.current, start: "top 72%" },
-        x: reduced || window.innerWidth < 768 ? 0 : (i: number) => (i % 2 === 0 ? -160 : 160),
+        x: reduced ? 0 : (i: number) => (i % 2 === 0 ? -160 : 160),
         y: 28,
         opacity: 0,
         duration: 0.95,

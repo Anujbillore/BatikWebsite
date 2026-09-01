@@ -192,6 +192,7 @@ export default function Scene() {
   return (
     <Canvas
       className="canvas-fixed"
+      frameloop="always"
       camera={{ position: [0, 0.05, mobile ? 2.55 : 3.05], fov: mobile ? 54 : 50 }}
       dpr={mobile ? [1, 1.4] : [1, 1.7]}
       gl={{ antialias: true, alpha: true, powerPreference: mobile ? "low-power" : "high-performance" }}
