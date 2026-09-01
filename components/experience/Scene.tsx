@@ -6,17 +6,6 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { pointer, scrollProgress, heroProgress } from "@/lib/store";
 
-const galleryMaps = [
-  "/images/batik/saffron-suit.jpg",
-  "/images/batik/crimson-suit.webp",
-  "/images/batik/teal-night.jpg",
-  "/images/batik/maroon-crackle.jpg",
-  "/images/batik/burgundy-paisley.jpg",
-  "/images/batik/rose-floral.jpg",
-  "/images/batik/bandhani-sunburst.jpg",
-  "/images/batik/chocolate-panel.jpg",
-];
-
 const DARK = new THREE.Color("#0b0706");
 const LIGHT = new THREE.Color("#f7f1e6");
 
@@ -25,83 +14,153 @@ function useBatikTexture(url: string) {
     const t = new THREE.TextureLoader().load(url);
     t.colorSpace = THREE.SRGBColorSpace;
     t.anisotropy = 8;
+    t.wrapS = THREE.MirroredRepeatWrapping;
+    t.wrapT = THREE.MirroredRepeatWrapping;
     t.minFilter = THREE.LinearMipmapLinearFilter;
     return t;
   }, [url]);
 }
 
-function HangPanel({ url, side, index }: { url: string; side: -1 | 1; index: number }) {
-  const group = useRef<THREE.Group>(null);
-  const { size } = useThree();
-  const compact = size.width < 768;
-  const geo = useMemo(
-    () => new THREE.PlaneGeometry(1.85, 3.4, compact ? 14 : 24, compact ? 24 : 40),
-    [compact]
-  );
+function SilkSheet({
+  url,
+  width,
+  height,
+  segs,
+  rotation,
+  position,
+  intensity = 1,
+}: {
+  url: string;
+  width: number;
+  height: number;
+  segs: [number, number];
+  rotation: [number, number, number];
+  position: [number, number, number];
+  intensity?: number;
+}) {
+  const mesh = useRef<THREE.Mesh>(null);
+  const geo = useMemo(() => new THREE.PlaneGeometry(width, height, segs[0], segs[1]), [width, height, segs]);
   const texture = useBatikTexture(url);
-  const x = side * (compact ? 1.72 : 2.35);
+  const frame = useRef(0);
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
+    const compact = state.size.width < 768;
     const pos = geo.attributes.position as THREE.BufferAttribute;
-    const wave = compact ? 0.11 : 0.08;
-    const step = compact ? 2 : 1;
-    for (let i = 0; i < pos.count; i += step) {
+    const px = pointer.x * (compact ? 3.4 : 4.2);
+    const py = pointer.y * (compact ? 4.4 : 5.2);
+    const touchBoost = pointer.touching || compact ? 1.35 : 1;
+    const wave = 0.24 * intensity * touchBoost;
+    const rippleAmp = 0.22 * intensity * touchBoost;
+
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i);
       const y = pos.getY(i);
-      const px = pos.getX(i);
-      const hang = (1.7 - y) / 3.4;
-      pos.setZ(i, Math.sin(t * 1.25 + index + y * 1.7) * wave * hang + px * 0.02 + pointer.x * 0.04 * hang);
+      const dx = x - px;
+      const dy = y - py;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const ripple = Math.sin(dist * 2.55 - t * 3.4) * rippleAmp * Math.exp(-dist * 0.42);
+      const swell =
+        Math.sin(x * 0.55 + t * 0.75) * wave +
+        Math.cos(y * 0.7 + t * 0.52) * (wave * 0.82) +
+        Math.sin((x + y) * 0.35 + t * 0.38) * (wave * 0.45);
+      const fold = Math.sin(x * 0.9 + t * 0.22) * Math.cos(y * 0.45) * 0.12 * intensity;
+      pos.setZ(i, swell + ripple + fold);
     }
     pos.needsUpdate = true;
-    if (!group.current) return;
-    group.current.rotation.y =
-      side * 0.2 + Math.sin(t * 0.45 + index) * 0.08 + pointer.x * (compact ? 0.16 : 0.08);
-    group.current.rotation.z = pointer.y * (compact ? 0.05 : 0.02);
+    frame.current += 1;
+    if (!compact || frame.current % 2 === 0) geo.computeVertexNormals();
+
+    if (!mesh.current) return;
+    mesh.current.rotation.z = rotation[2] + pointer.x * 0.07;
+    mesh.current.rotation.x = rotation[0] + pointer.y * 0.04;
+    mesh.current.position.z = position[2] - heroProgress.value * 0.55 - scrollProgress.value * 1.8;
   });
 
-  const z = 3.2 - index * 3.15;
   return (
-    <group ref={group} position={[x, compact ? 0.42 : 0.55, z]} scale={compact ? 0.92 : 1}>
-      <mesh position={[0, 1.85, 0]}>
-        <cylinderGeometry args={[0.02, 0.02, 2.05, 8]} />
-        <meshStandardMaterial color="#c9a227" metalness={0.8} roughness={0.25} />
-      </mesh>
-      <mesh geometry={geo} position={[0, 0.05, 0]}>
-        <meshStandardMaterial
-          map={texture}
-          side={THREE.DoubleSide}
-          roughness={0.45}
-          metalness={0.1}
-          emissive={new THREE.Color("#3a1808")}
-          emissiveIntensity={0.16}
-        />
-      </mesh>
+    <mesh ref={mesh} geometry={geo} rotation={rotation} position={position}>
+      <meshPhysicalMaterial
+        map={texture}
+        side={THREE.DoubleSide}
+        roughness={0.22}
+        metalness={0.12}
+        sheen={1}
+        sheenColor={new THREE.Color("#f4d35e")}
+        sheenRoughness={0.32}
+        clearcoat={0.28}
+        clearcoatRoughness={0.38}
+        emissive={new THREE.Color("#5a1c08")}
+        emissiveIntensity={0.28}
+      />
+    </mesh>
+  );
+}
+
+function SilkPour() {
+  const { size } = useThree();
+  const compact = size.width < 768;
+  const mainSegs: [number, number] = compact ? [42, 54] : [72, 90];
+  const backSegs: [number, number] = compact ? [24, 32] : [40, 50];
+
+  return (
+    <group>
+      <SilkSheet
+        url="/images/batik/teal-night.jpg"
+        width={7.4}
+        height={9.2}
+        segs={backSegs}
+        rotation={[0.1, 0.38, 0.05]}
+        position={[1.55, -0.35, -2.55]}
+        intensity={0.7}
+      />
+      <SilkSheet
+        url="/images/batik/saffron-suit.jpg"
+        width={6.2}
+        height={8.4}
+        segs={backSegs}
+        rotation={[0.12, -0.42, -0.06]}
+        position={[-1.7, -0.15, -2.2]}
+        intensity={0.75}
+      />
+      <SilkSheet
+        url="/images/batik/maroon-crackle.jpg"
+        width={compact ? 8.6 : 9.4}
+        height={compact ? 12.2 : 11.6}
+        segs={mainSegs}
+        rotation={[-0.16, 0, 0]}
+        position={[0, 0.05, -1.15]}
+        intensity={1}
+      />
     </group>
   );
 }
 
-function RunwayFloor() {
+function FollowLight() {
+  const light = useRef<THREE.SpotLight>(null);
+  useFrame(() => {
+    if (!light.current) return;
+    light.current.position.x = THREE.MathUtils.lerp(light.current.position.x, pointer.x * 2.4, 0.12);
+    light.current.position.y = THREE.MathUtils.lerp(light.current.position.y, 1.35 + pointer.y * 1.5, 0.12);
+  });
   return (
-    <group position={[0, -1.35, -4]}>
-      <mesh rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[9, 22]} />
-        <meshStandardMaterial color="#120c09" roughness={0.85} metalness={0.15} />
-      </mesh>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
-        <planeGeometry args={[0.28, 22]} />
-        <meshStandardMaterial color="#e8c547" metalness={0.9} roughness={0.2} emissive="#8a5a10" emissiveIntensity={0.45} />
-      </mesh>
-    </group>
+    <spotLight
+      ref={light}
+      position={[0, 1.4, 3.1]}
+      angle={0.62}
+      penumbra={0.85}
+      intensity={3.1}
+      color="#ffe7c2"
+    />
   );
 }
 
 function Atmosphere() {
   const { scene } = useThree();
   const bg = useMemo(() => new THREE.Color("#0b0706"), []);
-  const fog = useMemo(() => new THREE.Fog("#0b0706", 8, 18), []);
+  const fog = useMemo(() => new THREE.Fog("#0b0706", 3.2, 11), []);
 
   useFrame(() => {
-    const t = THREE.MathUtils.smoothstep(scrollProgress.value, 0.06, 0.2);
+    const t = THREE.MathUtils.smoothstep(scrollProgress.value, 0.06, 0.22);
     bg.copy(DARK).lerp(LIGHT, t);
     fog.color.copy(bg);
     scene.background = bg;
@@ -115,17 +174,15 @@ function Rig() {
   useFrame((state) => {
     const compact = state.size.width < 768;
     const t = state.clock.elapsedTime;
-    const walk = compact ? heroProgress.value : scrollProgress.value;
-    const startZ = compact ? 7.35 : 7.2;
-    const targetZ = startZ - walk * (compact ? 9.2 : 11);
-    const idleX = compact && !pointer.touching ? Math.sin(t * 0.42) * 0.32 : 0;
-    const idleY = compact && !pointer.touching ? Math.cos(t * 0.31) * 0.08 : 0;
-    const targetX = pointer.x * (compact ? 0.62 : 0.55) + idleX;
-    const targetY = (compact ? 0.52 : 0.55) + pointer.y * (compact ? 0.22 : 0.06) + idleY;
-    state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, targetX, compact ? 0.09 : 0.06);
-    state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, targetZ, compact ? 0.1 : 0.06);
-    state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetY, compact ? 0.09 : 0.06);
-    state.camera.lookAt(pointer.x * (compact ? 0.55 : 0.15), 0.35 + pointer.y * 0.12, targetZ - 8);
+    const idleX = compact && !pointer.touching ? Math.sin(t * 0.38) * 0.18 : 0;
+    const idleY = compact && !pointer.touching ? Math.cos(t * 0.27) * 0.08 : 0;
+    const targetZ = (compact ? 2.55 : 3.05) - heroProgress.value * 0.45 - scrollProgress.value * 0.35;
+    const targetX = pointer.x * (compact ? 0.42 : 0.22) + idleX;
+    const targetY = 0.04 + pointer.y * (compact ? 0.28 : 0.14) + idleY;
+    state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, targetX, 0.1);
+    state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetY, 0.1);
+    state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, targetZ, 0.1);
+    state.camera.lookAt(pointer.x * 0.35, pointer.y * 0.2, -1.2);
   });
   return null;
 }
@@ -135,23 +192,25 @@ export default function Scene() {
   return (
     <Canvas
       className="canvas-fixed"
-      camera={{ position: [0, 0.55, mobile ? 7.35 : 7.2], fov: mobile ? 50 : 48 }}
-      dpr={mobile ? [1, 1.35] : [1, 1.6]}
+      camera={{ position: [0, 0.05, mobile ? 2.55 : 3.05], fov: mobile ? 54 : 50 }}
+      dpr={mobile ? [1, 1.4] : [1, 1.7]}
       gl={{ antialias: true, alpha: true, powerPreference: mobile ? "low-power" : "high-performance" }}
     >
       <Atmosphere />
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[4, 6, 5]} intensity={1.45} color="#fff1d6" />
-      <pointLight position={[-3.2, 2.2, 2.4]} intensity={1.55} color="#2ec4b6" />
-      <pointLight position={[3.4, -1, 3]} intensity={1.25} color="#ee9b00" />
-      <RunwayFloor />
-      {galleryMaps.map((url, i) => (
-        <HangPanel key={url} url={url} side={i % 2 === 0 ? -1 : 1} index={Math.floor(i / 2)} />
-      ))}
-      <spotLight position={[0, 4.2, 4]} angle={0.35} penumbra={0.5} intensity={2.2} color="#ffe7c2" />
-      <spotLight position={[0, 4.2, -2]} angle={0.4} penumbra={0.6} intensity={1.6} color="#2ec4b6" />
-      <spotLight position={[0, 4.2, -8]} angle={0.4} penumbra={0.6} intensity={1.4} color="#ee9b00" />
-      <Sparkles count={mobile ? 70 : 90} scale={[14, 8, 8]} size={2.6} speed={0.42} color="#e8c547" opacity={0.55} />
+      <ambientLight intensity={0.42} />
+      <directionalLight position={[3.2, 4.2, 4]} intensity={1.35} color="#fff1d6" />
+      <pointLight position={[-2.4, 1.6, 2.2]} intensity={1.7} color="#2ec4b6" />
+      <pointLight position={[2.6, -0.6, 2.4]} intensity={1.45} color="#ee9b00" />
+      <FollowLight />
+      <SilkPour />
+      <Sparkles
+        count={mobile ? 80 : 110}
+        scale={[10, 8, 6]}
+        size={2.4}
+        speed={0.45}
+        color="#e8c547"
+        opacity={0.55}
+      />
       <Rig />
     </Canvas>
   );

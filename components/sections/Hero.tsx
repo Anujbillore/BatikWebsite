@@ -8,7 +8,7 @@ export default function Hero() {
       id="home"
       className="relative flex min-h-[100svh] flex-col justify-end px-4 pb-20 pt-28 sm:px-5 md:px-12 md:pb-24 md:pt-32"
     >
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/35 via-transparent to-ivory" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/28 via-transparent to-ivory" />
       <p className="relative mb-4 max-w-[20rem] text-[10px] uppercase leading-relaxed tracking-[0.18em] text-amber-300 sm:max-w-none sm:text-[11px] sm:tracking-[0.32em] md:tracking-[0.48em]">
         Batik · Ujjain &nbsp;|&nbsp; Smoking craft · Mhow
       </p>
