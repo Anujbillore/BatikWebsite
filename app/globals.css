@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #2a1a12;
+  --ivory: #f7f1e6;
+  --paper: #fffaf3;
+  --saffron: #c2410c;
+  --gold: #b45309;
+  --turquoise: #0f766e;
+  --crimson: #b91c1c;
+}
+
+html,
+body {
+  background: var(--ivory);
+  color: var(--ink);
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+::selection {
+  background: #fbbf24;
+  color: var(--ink);
+}
+
+body {
+  cursor: none;
+}
+
+a,
+button,
+input,
+textarea,
+label {
+  cursor: none;
+}
+
+@media (pointer: coarse) {
+  body,
+  a,
+  button,
+  input,
+  textarea,
+  label {
+    cursor: auto;
+  }
+}
+
+.canvas-fixed {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.glass {
+  background: rgba(255, 250, 243, 0.82);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(42, 26, 18, 0.1);
+  color: var(--ink);
+}
+
+.gold-btn {
+  background: linear-gradient(135deg, #f4d35e, #ea580c);
+  color: #1c1008;
+  box-shadow: 0 8px 24px rgba(194, 65, 12, 0.28);
+}
+
+.marquee-track {
+  animation: marquee 28s linear infinite;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.crackle {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cpath fill='none' stroke='%23c2410c' stroke-opacity='0.22' stroke-width='0.6' d='M10 20c20 8 12 40 40 36s28-40 60-20 40 10 50-20'/%3E%3Cpath fill='none' stroke='%230f766e' stroke-opacity='0.16' stroke-width='0.5' d='M0 80c30-10 40 30 70 20s40-50 80-20'/%3E%3C/svg%3E");
+}
+
+.vertical-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  letter-spacing: 0.28em;
+}
+
+.field {
+  @apply mt-2 w-full rounded-xl border border-ink/15 bg-white px-4 py-3 text-base text-ink outline-none focus:border-saffron;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
